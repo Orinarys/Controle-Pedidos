@@ -31,28 +31,24 @@ function PedidoApp() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Estado dos campos de entrada
-  const [numeroPedido, setNumeroPedido] = useState(''); // NOVO: Estado para o número do pedido inserido pelo usuário
+  const [numeroPedido, setNumeroPedido] = useState('');
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [peso, setPeso] = useState(''); // Peso em KG
   const [status, setStatus] = useState(false);
   const [valor, setValor] = useState('');
 
-  // Estado dos filtros e busca
   const [filtro, setFiltro] = useState('');
   const [busca, setBusca] = useState('');
   const [filtroDataInicio, setFiltroDataInicio] = useState('');
   const [filtroDataFim, setFiltroDataFim] = useState('');
   const [comissao, setComissao] = useState('');
 
-  // Estado de validação
-  const [numeroPedidoErro, setNumeroPedidoErro] = useState(false); // NOVO: Estado de erro para número do pedido
+  const [numeroPedidoErro, setNumeroPedidoErro] = useState(false);
   const [nomeErro, setNomeErro] = useState(false);
   const [valorErro, setValorErro] = useState(false);
   const [pesoErro, setPesoErro] = useState(false);
 
-  // Estado do tema
   const [theme, setTheme] = useState(() => {
     if (localStorage.getItem('theme')) {
       return localStorage.getItem('theme');
@@ -64,7 +60,6 @@ function PedidoApp() {
     localStorage.setItem('pedidos', JSON.stringify(pedidos));
   }, [pedidos]);
 
-  // Efeito para aplicar e salvar o tema
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
@@ -79,12 +74,10 @@ function PedidoApp() {
   const adicionarPedido = () => {
     let hasError = false;
 
-    // NOVO: Validação do número do pedido
     if (!numeroPedido.trim() || isNaN(parseInt(numeroPedido)) || parseInt(numeroPedido) <= 0) {
       setNumeroPedidoErro(true);
       hasError = true;
     } else {
-      // Opcional: verificar se o número do pedido já existe
       if (pedidos.some(p => p.numero === parseInt(numeroPedido))) {
         setNumeroPedidoErro(true);
         alert('Erro: Número do pedido já existe. Por favor, insira um número único.');
@@ -120,8 +113,8 @@ function PedidoApp() {
     }
 
     const newPedido = {
-      id: Date.now(), // ID único para o React
-      numero: parseInt(numeroPedido), // USA O NÚMERO INSERIDO PELO USUÁRIO
+      id: Date.now(),
+      numero: parseInt(numeroPedido),
       nome,
       descricao,
       peso: peso ? parseFloat(peso) : null,
@@ -131,8 +124,7 @@ function PedidoApp() {
     };
 
     setPedidos([...pedidos, newPedido]);
-    // Limpar todos os campos
-    setNumeroPedido(''); // Limpa o novo campo
+    setNumeroPedido('');
     setNome('');
     setDescricao('');
     setPeso('');
@@ -181,7 +173,7 @@ function PedidoApp() {
     p.nome.toLowerCase().includes(busca.toLowerCase()) &&
     (!filtroDataInicio || new Date(p.data + 'T00:00:00') >= new Date(filtroDataInicio + 'T00:00:00')) &&
     (!filtroDataFim || new Date(p.data + 'T00:00:00') <= new Date(filtroDataFim + 'T00:00:00'))
-  ).sort((a, b) => b.numero - a.numero); // Ordena por número do pedido (decrescente, para os mais novos aparecerem primeiro)
+  ).sort((a, b) => b.numero - a.numero);
 
   const totalValor = pedidosFiltrados.reduce((acc, p) => acc + (p.valor || 0), 0);
   const totalPeso = pedidosFiltrados.reduce((acc, p) => acc + (p.peso || 0), 0);
@@ -208,12 +200,11 @@ function PedidoApp() {
             Adicionar Novo Pedido
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6'>
-            {/* NOVO CAMPO: Número do Pedido */}
             <div>
               <label htmlFor='numeroPedido' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Número do Pedido</label>
               <Input
                 id='numeroPedido'
-                type='number' // Tipo numérico
+                type='number'
                 placeholder='Ex: 1001'
                 value={numeroPedido}
                 onChange={e => setNumeroPedido(e.target.value)}
@@ -221,7 +212,6 @@ function PedidoApp() {
               />
               {numeroPedidoErro && <p className='text-red-500 text-xs mt-1'>Número do pedido inválido ou já existente.</p>}
             </div>
-            {/* FIM NOVO CAMPO */}
 
             <div>
               <label htmlFor='nome' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Nome do Cliente</label>
@@ -258,7 +248,7 @@ function PedidoApp() {
               />
               {pesoErro && <p className='text-red-500 text-xs mt-1'>Peso inválido.</p>}
             </div>
-            <div className='md:col-span-2'> {/* Descrição agora ocupa 2 colunas */}
+            <div className='md:col-span-2'>
               <label htmlFor='descricao' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Descrição (opcional)</label>
               <Input
                 id='descricao'
@@ -288,7 +278,7 @@ function PedidoApp() {
           </Button>
         </Card>
 
-        {/* Seção de Filtros e Resumo (inalterada nesta etapa) */}
+        {/* Seção de Filtros e Resumo */}
         <Card className='p-8 mb-8 shadow-xl bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 transition-colors duration-300'>
           <h2 className='text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6'>
             Filtros e Resumo
