@@ -180,7 +180,7 @@ function PedidoApp() {
   const comissaoValor = comissao && !isNaN(parseFloat(comissao)) ? (parseFloat(comissao) / 100) * totalValor : 0;
 
   return (
-    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 text-black dark:text-black p-6 font-sans antialiased transition-colors duration-300'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 text-black dark:text-white p-6 font-sans antialiased transition-colors duration-300'>
       <div className='max-w-4xl mx-auto'>
         <div className='flex justify-between items-center mb-8'>
           <h1 className='text-4xl font-bold'>
@@ -208,7 +208,7 @@ function PedidoApp() {
                 placeholder='Ex: 1001'
                 value={numeroPedido}
                 onChange={e => setNumeroPedido(e.target.value)}
-                className={`w-full p-2 border ${numeroPedidoErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150`}
+                className={`w-full p-2 border ${numeroPedidoErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150`}
               />
               {numeroPedidoErro && <p className='text-red-500 text-xs mt-1'>Número do pedido inválido ou já existente.</p>}
             </div>
@@ -220,7 +220,7 @@ function PedidoApp() {
                 placeholder='Ex: João da Silva'
                 value={nome}
                 onChange={e => setNome(e.target.value)}
-                className={`w-full p-2 border ${nomeErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150`}
+                className={`w-full p-2 border ${nomeErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150`}
               />
               {nomeErro && <p className='text-red-500 text-xs mt-1'>Nome do cliente é obrigatório.</p>}
             </div>
@@ -232,7 +232,7 @@ function PedidoApp() {
                 placeholder='Ex: 150.75'
                 value={valor}
                 onChange={e => setValor(e.target.value)}
-                className={`w-full p-2 border ${valorErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150`}
+                className={`w-full p-2 border ${valorErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150`}
               />
               {valorErro && <p className='text-red-500 text-xs mt-1'>Valor inválido.</p>}
             </div>
@@ -244,7 +244,7 @@ function PedidoApp() {
                 placeholder='Ex: 2.5 (para 2.5kg)'
                 value={peso}
                 onChange={e => setPeso(e.target.value)}
-                className={`w-full p-2 border ${pesoErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150`}
+                className={`w-full p-2 border ${pesoErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150`}
               />
               {pesoErro && <p className='text-red-500 text-xs mt-1'>Peso inválido.</p>}
             </div>
@@ -255,7 +255,7 @@ function PedidoApp() {
                 placeholder='Detalhes do pedido...'
                 value={descricao}
                 onChange={e => setDescricao(e.target.value)}
-                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150'
               />
             </div>
             <div className='flex items-center space-x-2 mt-2 md:col-span-2'>
@@ -292,14 +292,14 @@ function PedidoApp() {
                 placeholder='Buscar cliente...'
                 value={busca}
                 onChange={e => setBusca(e.target.value)}
-                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150'
               />
             </div>
             <div>
               <label htmlFor='filtroStatus' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Filtrar por Status</label>
               <select
                 id='filtroStatus'
-                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-black focus:ring-blue-500 focus:border-blue-500 transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white focus:ring-blue-500 focus:border-blue-500 transition duration-150'
                 onChange={e => setFiltro(e.target.value)}
                 value={filtro}
               >
@@ -315,7 +315,7 @@ function PedidoApp() {
                 type='date'
                 value={filtroDataInicio}
                 onChange={e => setFiltroDataInicio(e.target.value)}
-                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150'
               />
             </div>
             <div>
@@ -325,7 +325,7 @@ function PedidoApp() {
                 type='date'
                 value={filtroDataFim}
                 onChange={e => setFiltroDataFim(e.target.value)}
-                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150'
               />
             </div>
             <div className='col-span-full sm:col-span-1 flex items-end'>
@@ -350,7 +350,7 @@ function PedidoApp() {
                 placeholder='Ex: 5'
                 value={comissao}
                 onChange={e => setComissao(e.target.value)}
-                className='w-24 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-black transition duration-150'
+                className='w-24 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-black dark:text-white transition duration-150'
               />
               <p className='text-md font-medium text-gray-800 dark:text-gray-100'>
                 Valor da Comissão: <span className='text-orange-500 dark:text-orange-400'>R$ {comissaoValor.toFixed(2)}</span>
@@ -371,7 +371,7 @@ function PedidoApp() {
               <Card key={p.id} className='p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out border border-gray-100 dark:border-gray-700'>
                 <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center'>
                   <div className='mb-4 sm:mb-0'>
-                    <p className='font-bold text-xl text-black dark:text-black'>
+                    <p className='font-bold text-xl text-black dark:text-white'>
                       Pedido #{p.numero} - {p.nome} - {formatarPeso(p.peso)}
                     </p>
                     <p className='text-sm text-gray-600 dark:text-gray-300 mt-1'>
