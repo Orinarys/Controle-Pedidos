@@ -1,3 +1,4 @@
+// tailwind.config.js
 export default {
   content: [
     "./index.html",
@@ -7,4 +8,5 @@ export default {
     extend: {},
   },
   plugins: [],
+  darkMode: 'class', // <--- Adicione esta linha
 }

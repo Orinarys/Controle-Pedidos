@@ -4,9 +4,26 @@ import { Input } from './components/ui/input';
 import { Card } from './components/ui/card';
 import { Checkbox } from './components/ui/checkbox';
 
-// Importar ícones se estiver usando uma biblioteca de ícones como Lucide React ou React-Icons
-// Exemplo: import { CheckCircle, XCircle, Trash2, Repeat2, Download } from 'lucide-react';
-// Para fins de demonstração, usaremos emojis simples.
+// Ícones para demonstração (você pode substituir por uma biblioteca de ícones)
+const MoonIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-moon">
+    <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+  </svg>
+);
+
+const SunIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sun">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2"></path>
+    <path d="M12 20v2"></path>
+    <path d="M4.93 4.93l1.41 1.41"></path>
+    <path d="M17.66 17.66l1.41 1.41"></path>
+    <path d="M2 12h2"></path>
+    <path d="M20 12h2"></path>
+    <path d="M4.93 19.07l1.41-1.41"></path>
+    <path d="M17.66 6.34l1.41-1.41"></path>
+  </svg>
+);
 
 function PedidoApp() {
   const [pedidos, setPedidos] = useState(() => {
@@ -14,27 +31,47 @@ function PedidoApp() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Estado dos campos de entrada
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [peso, setPeso] = useState('');
+  const [peso, setPeso] = useState(''); // Peso em KG
   const [status, setStatus] = useState(false);
   const [valor, setValor] = useState('');
 
-  // Estado dos filtros e busca
-  const [filtro, setFiltro] = useState(''); // '' para todos, 'finalizado', 'nao-finalizado'
+  const [filtro, setFiltro] = useState('');
   const [busca, setBusca] = useState('');
   const [filtroDataInicio, setFiltroDataInicio] = useState('');
   const [filtroDataFim, setFiltroDataFim] = useState('');
   const [comissao, setComissao] = useState('');
 
-  // Estado de validação
   const [nomeErro, setNomeErro] = useState(false);
   const [valorErro, setValorErro] = useState(false);
+  const [pesoErro, setPesoErro] = useState(false); // Novo estado de erro para peso
+
+  // Estado do tema
+  const [theme, setTheme] = useState(() => {
+    // Tenta pegar do localStorage ou usa 'light' como padrão
+    if (localStorage.getItem('theme')) {
+      return localStorage.getItem('theme');
+    }
+    // Se não houver preferência, verifica a preferência do sistema
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
 
   useEffect(() => {
     localStorage.setItem('pedidos', JSON.stringify(pedidos));
   }, [pedidos]);
+
+  // Efeito para aplicar e salvar o tema
+  useEffect(() => {
+    const root = window.document.documentElement; // html element
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
   const adicionarPedido = () => {
     let hasError = false;
@@ -46,6 +83,7 @@ function PedidoApp() {
       setNomeErro(false);
     }
 
+    // Validação de valor
     if (!valor || isNaN(parseFloat(valor)) || parseFloat(valor) <= 0) {
       setValorErro(true);
       hasError = true;
@@ -53,24 +91,31 @@ function PedidoApp() {
       setValorErro(false);
     }
 
+    // Nova validação de peso
+    if (peso && (isNaN(parseFloat(peso)) || parseFloat(peso) < 0)) {
+        setPesoErro(true);
+        hasError = true;
+    } else {
+        setPesoErro(false);
+    }
+
     if (hasError) {
       return;
     }
 
-    setPedidos([
-      ...pedidos,
-      {
-        id: Date.now(),
-        numero: pedidos.length + 1,
-        nome,
-        descricao,
-        peso,
-        status,
-        valor: parseFloat(valor),
-        data: new Date().toISOString().split('T')[0], // Formato YYYY-MM-DD
-      },
-    ]);
-    // Limpar os campos após adicionar
+    const newPedido = {
+      id: Date.now(),
+      // Garante que o número do pedido seja sempre crescente e único
+      numero: pedidos.length > 0 ? Math.max(...pedidos.map(p => p.numero)) + 1 : 1,
+      nome,
+      descricao,
+      peso: peso ? parseFloat(peso) : null, // Salva o peso como número (em KG)
+      status,
+      valor: parseFloat(valor),
+      data: new Date().toISOString().split('T')[0],
+    };
+
+    setPedidos([...pedidos, newPedido]);
     setNome('');
     setDescricao('');
     setPeso('');
@@ -88,12 +133,21 @@ function PedidoApp() {
     }
   };
 
+  // Função auxiliar para formatar peso
+  const formatarPeso = (pesoKg) => {
+    if (pesoKg === null || isNaN(pesoKg)) return 'N/A';
+    if (pesoKg >= 1000) {
+      return `${(pesoKg / 1000).toFixed(2)} Ton`;
+    }
+    return `${pesoKg.toFixed(2)} Kg`;
+  };
+
   const exportarCSV = () => {
-    const headers = ['Numero', 'Nome', 'Peso', 'Valor', 'Data', 'Status'];
+    const headers = ['Numero', 'Nome', 'Peso (Kg)', 'Valor', 'Data', 'Status'];
     const csvContent = [
       headers.join(','),
       ...pedidosFiltrados.map(p =>
-        `${p.numero},"${p.nome}",${p.peso},${p.valor.toFixed(2)},${p.data},${p.status ? 'Finalizado' : 'Nao finalizado'}`
+        `${p.numero},"${p.nome}",${p.peso !== null ? p.peso.toFixed(2) : ''},${p.valor.toFixed(2)},${p.data},${p.status ? 'Finalizado' : 'Nao finalizado'}`
       )
     ].join('\n');
 
@@ -109,68 +163,78 @@ function PedidoApp() {
   const pedidosFiltrados = pedidos.filter(p =>
     (filtro === '' || (filtro === 'finalizado' && p.status) || (filtro === 'nao-finalizado' && !p.status)) &&
     p.nome.toLowerCase().includes(busca.toLowerCase()) &&
-    (!filtroDataInicio || new Date(p.data) >= new Date(filtroDataInicio)) &&
-    (!filtroDataFim || new Date(p.data) <= new Date(filtroDataFim))
+    (!filtroDataInicio || new Date(p.data + 'T00:00:00') >= new Date(filtroDataInicio + 'T00:00:00')) && // Adiciona 'T00:00:00' para evitar problemas de fuso horário
+    (!filtroDataFim || new Date(p.data + 'T00:00:00') <= new Date(filtroDataFim + 'T00:00:00'))
   );
 
-  const total = pedidosFiltrados.reduce((acc, p) => acc + (p.valor || 0), 0);
-  const comissaoValor = comissao && !isNaN(parseFloat(comissao)) ? (parseFloat(comissao) / 100) * total : 0;
+  const totalValor = pedidosFiltrados.reduce((acc, p) => acc + (p.valor || 0), 0);
+  const totalPeso = pedidosFiltrados.reduce((acc, p) => acc + (p.peso || 0), 0); // Peso total em KG
+  const comissaoValor = comissao && !isNaN(parseFloat(comissao)) ? (parseFloat(comissao) / 100) * totalValor : 0;
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6 font-sans antialiased'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 font-sans antialiased transition-colors duration-300'>
       <div className='max-w-4xl mx-auto'>
-        <h1 className='text-4xl font-bold text-gray-800 mb-8 text-center'>
-          Controle de Pedidos
-        </h1>
+        <div className='flex justify-between items-center mb-8'>
+          <h1 className='text-4xl font-bold'>
+            Controle de Pedidos
+          </h1>
+          <Button
+            onClick={toggleTheme}
+            className='p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300'
+          >
+            {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+          </Button>
+        </div>
 
         {/* Seção de Adicionar Pedido */}
-        <Card className='p-8 mb-8 shadow-xl bg-white rounded-xl border border-gray-100'>
-          <h2 className='text-2xl font-semibold text-gray-700 mb-6'>
+        <Card className='p-8 mb-8 shadow-xl bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 transition-colors duration-300'>
+          <h2 className='text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6'>
             Adicionar Novo Pedido
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6'>
             <div>
-              <label htmlFor='nome' className='block text-sm font-medium text-gray-700 mb-2'>Nome do Cliente</label>
+              <label htmlFor='nome' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Nome do Cliente</label>
               <Input
                 id='nome'
                 placeholder='Ex: João da Silva'
                 value={nome}
                 onChange={e => setNome(e.target.value)}
-                className={`w-full p-2 border ${nomeErro ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-150`}
+                className={`w-full p-2 border ${nomeErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition duration-150`}
               />
               {nomeErro && <p className='text-red-500 text-xs mt-1'>Nome do cliente é obrigatório.</p>}
             </div>
             <div>
-              <label htmlFor='valor' className='block text-sm font-medium text-gray-700 mb-2'>Valor do Pedido (R$)</label>
+              <label htmlFor='valor' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Valor do Pedido (R$)</label>
               <Input
                 id='valor'
                 type='number'
                 placeholder='Ex: 150.75'
                 value={valor}
                 onChange={e => setValor(e.target.value)}
-                className={`w-full p-2 border ${valorErro ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-150`}
+                className={`w-full p-2 border ${valorErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition duration-150`}
               />
               {valorErro && <p className='text-red-500 text-xs mt-1'>Valor inválido.</p>}
             </div>
             <div>
-              <label htmlFor='peso' className='block text-sm font-medium text-gray-700 mb-2'>Peso do Pedido (kg)</label>
+              <label htmlFor='peso' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Peso do Pedido (Kg)</label>
               <Input
                 id='peso'
                 type='number'
-                placeholder='Ex: 2.5'
+                placeholder='Ex: 2.5 (para 2.5kg) ou 200 (para 200g)'
                 value={peso}
                 onChange={e => setPeso(e.target.value)}
-                className='w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-150'
+                className={`w-full p-2 border ${pesoErro ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition duration-150`}
               />
+              {pesoErro && <p className='text-red-500 text-xs mt-1'>Peso inválido.</p>}
             </div>
             <div>
-              <label htmlFor='descricao' className='block text-sm font-medium text-gray-700 mb-2'>Descrição (opcional)</label>
+              <label htmlFor='descricao' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Descrição (opcional)</label>
               <Input
                 id='descricao'
                 placeholder='Detalhes do pedido...'
                 value={descricao}
                 onChange={e => setDescricao(e.target.value)}
-                className='w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition duration-150'
               />
             </div>
             <div className='flex items-center space-x-2 mt-2 md:col-span-2'>
@@ -178,9 +242,9 @@ function PedidoApp() {
                 id='status'
                 checked={status}
                 onCheckedChange={setStatus}
-                className='h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+                className='h-5 w-5 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500'
               />
-              <label htmlFor='status' className='text-base font-medium text-gray-700 cursor-pointer select-none'>
+              <label htmlFor='status' className='text-base font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none'>
                 Marcar como finalizado
               </label>
             </div>
@@ -194,27 +258,27 @@ function PedidoApp() {
         </Card>
 
         {/* Seção de Filtros e Resumo */}
-        <Card className='p-8 mb-8 shadow-xl bg-white rounded-xl border border-gray-100'>
-          <h2 className='text-2xl font-semibold text-gray-700 mb-6'>
+        <Card className='p-8 mb-8 shadow-xl bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 transition-colors duration-300'>
+          <h2 className='text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6'>
             Filtros e Resumo
           </h2>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end mb-6'>
             <div className='col-span-full sm:col-span-2'>
-              <label htmlFor='busca' className='block text-sm font-medium text-gray-700 mb-2'>Buscar por Nome</label>
+              <label htmlFor='busca' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Buscar por Nome</label>
               <Input
                 id='busca'
                 type='text'
                 placeholder='Buscar cliente...'
                 value={busca}
                 onChange={e => setBusca(e.target.value)}
-                className='w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition duration-150'
               />
             </div>
             <div>
-              <label htmlFor='filtroStatus' className='block text-sm font-medium text-gray-700 mb-2'>Filtrar por Status</label>
+              <label htmlFor='filtroStatus' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Filtrar por Status</label>
               <select
                 id='filtroStatus'
-                className='w-full p-2 border border-gray-300 rounded-md bg-white focus:ring-blue-500 focus:border-blue-500 transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 transition duration-150'
                 onChange={e => setFiltro(e.target.value)}
                 value={filtro}
               >
@@ -224,76 +288,78 @@ function PedidoApp() {
               </select>
             </div>
             <div>
-              <label htmlFor='dataInicio' className='block text-sm font-medium text-gray-700 mb-2'>Data Início</label>
+              <label htmlFor='dataInicio' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Data Início</label>
               <Input
                 id='dataInicio'
                 type='date'
                 value={filtroDataInicio}
                 onChange={e => setFiltroDataInicio(e.target.value)}
-                className='w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition duration-150'
               />
             </div>
             <div>
-              <label htmlFor='dataFim' className='block text-sm font-medium text-gray-700 mb-2'>Data Fim</label>
+              <label htmlFor='dataFim' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Data Fim</label>
               <Input
                 id='dataFim'
                 type='date'
                 value={filtroDataFim}
                 onChange={e => setFiltroDataFim(e.target.value)}
-                className='w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-150'
+                className='w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition duration-150'
               />
             </div>
             <div className='col-span-full sm:col-span-1 flex items-end'>
               <Button onClick={exportarCSV} className='w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-md shadow-sm hover:shadow-md transition duration-200 ease-in-out'>
-                {/* <Download className="inline-block mr-2" size={20} /> */}
                 Exportar CSV
               </Button>
             </div>
           </div>
 
-          <div className='mt-6 pt-6 border-t border-gray-200'>
-            <p className='text-xl font-semibold text-gray-800 mb-4'>
-              Total dos Pedidos Filtrados: <span className='text-blue-600'>R$ {total.toFixed(2)}</span>
+          <div className='mt-6 pt-6 border-t border-gray-200 dark:border-gray-700'>
+            <p className='text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+              Total dos Pedidos Filtrados: <span className='text-blue-600 dark:text-blue-400'>R$ {totalValor.toFixed(2)}</span>
+            </p>
+            <p className='text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+              Peso Total dos Pedidos Filtrados: <span className='text-purple-600 dark:text-purple-400'>{formatarPeso(totalPeso)}</span>
             </p>
             <div className='flex items-center gap-4'>
-              <label htmlFor='comissao' className='text-md font-medium text-gray-700'>Comissão (%)</label>
+              <label htmlFor='comissao' className='text-md font-medium text-gray-700 dark:text-gray-300'>Comissão (%)</label>
               <Input
                 id='comissao'
                 type='number'
                 placeholder='Ex: 5'
                 value={comissao}
                 onChange={e => setComissao(e.target.value)}
-                className='w-24 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-150'
+                className='w-24 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition duration-150'
               />
-              <p className='text-md font-medium text-gray-800'>
-                Valor da Comissão: <span className='text-orange-500'>R$ {comissaoValor.toFixed(2)}</span>
+              <p className='text-md font-medium text-gray-800 dark:text-gray-100'>
+                Valor da Comissão: <span className='text-orange-500 dark:text-orange-400'>R$ {comissaoValor.toFixed(2)}</span>
               </p>
             </div>
           </div>
         </Card>
 
         {/* Lista de Pedidos */}
-        <h2 className='text-3xl font-semibold text-gray-800 mb-6'>Meus Pedidos</h2>
+        <h2 className='text-3xl font-semibold text-gray-800 dark:text-gray-100 mb-6'>Meus Pedidos</h2>
         {pedidosFiltrados.length === 0 ? (
-          <p className='text-center text-gray-500 text-xl py-12'>
+          <p className='text-center text-gray-500 dark:text-gray-400 text-xl py-12'>
             Nenhum pedido encontrado com os filtros aplicados. 😔
           </p>
         ) : (
           <div className='grid gap-4'>
             {pedidosFiltrados.map(p => (
-              <Card key={p.id} className='p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out border border-gray-100'>
+              <Card key={p.id} className='p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition duration-200 ease-in-out border border-gray-100 dark:border-gray-700'>
                 <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center'>
                   <div className='mb-4 sm:mb-0'>
-                    <p className='font-bold text-xl text-gray-900'>
-                      #{p.numero} - {p.nome} {p.peso ? `- ${p.peso}kg` : ''}
+                    <p className='font-bold text-xl text-gray-900 dark:text-gray-100'>
+                      Pedido #{p.numero} - {p.nome} - {formatarPeso(p.peso)}
                     </p>
-                    <p className='text-sm text-gray-600 mt-1'>
-                      Data: {p.data} - <span className='font-semibold text-blue-700'>R$ {p.valor.toFixed(2)}</span>
+                    <p className='text-sm text-gray-600 dark:text-gray-300 mt-1'>
+                      Data: {p.data} - <span className='font-semibold text-blue-700 dark:text-blue-400'>R$ {p.valor.toFixed(2)}</span>
                     </p>
-                    {p.descricao && <p className='text-sm text-gray-700 mt-2'>Descrição: {p.descricao}</p>}
+                    {p.descricao && <p className='text-sm text-gray-700 dark:text-gray-300 mt-2'>Descrição: {p.descricao}</p>}
                     <p className='mt-2 text-md font-medium'>
                       Status:
-                      <span className={`ml-2 px-2 py-0.5 rounded-full text-white text-xs ${p.status ? 'bg-green-500' : 'bg-red-500'}`}>
+                      <span className={`ml-2 px-2.5 py-0.5 rounded-full text-white text-sm ${p.status ? 'bg-green-500' : 'bg-red-500'}`}>
                         {p.status ? 'Finalizado ✅' : 'Pendente ⏳'}
                       </span>
                     </p>
@@ -303,14 +369,12 @@ function PedidoApp() {
                       onClick={() => atualizarStatus(p.id)}
                       className='bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm shadow-sm hover:shadow-md transition duration-200 ease-in-out'
                     >
-                      {/* <Repeat2 className="inline-block mr-2" size={16} /> */}
                       Alternar Status
                     </Button>
                     <Button
                       onClick={() => excluirPedido(p.id)}
                       className='bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm shadow-sm hover:shadow-md transition duration-200 ease-in-out'
                     >
-                      {/* <Trash2 className="inline-block mr-2" size={16} /> */}
                       Excluir
                     </Button>
                   </div>
