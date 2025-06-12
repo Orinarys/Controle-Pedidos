@@ -1,0 +1,1 @@
+export const Checkbox = (props) => <input type='checkbox' className='mr-2' {...props} />;
